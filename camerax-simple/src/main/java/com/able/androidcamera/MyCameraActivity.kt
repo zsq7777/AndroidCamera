@@ -20,6 +20,7 @@ class MyCameraActivity : AppCompatActivity() {
     private lateinit var mPvV: PreviewView
     private lateinit var mPv: Preview
     private lateinit var mProcessCameraProvider: ProcessCameraProvider
+
     //
 //    private lateinit var mImageCapture: ImageCapture
     private var mCameraLensFacing: Int? = CameraSelector.LENS_FACING_BACK
@@ -66,7 +67,7 @@ class MyCameraActivity : AppCompatActivity() {
             mCameraLensFacing.let {
                 if (it == CameraSelector.LENS_FACING_FRONT)
 
-                bindPreview(
+                    bindPreview(
                         mProcessCameraProvider,
                         cameraBackSelector
                     )
@@ -85,8 +86,6 @@ class MyCameraActivity : AppCompatActivity() {
                 mPv = Preview.Builder().build()
                 //preview连接到PreviewView上
                 mPv.setSurfaceProvider(mPvV.surfaceProvider)
-
-
 
 
                 //标记方向

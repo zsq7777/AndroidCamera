@@ -44,7 +44,8 @@ class MainActivity : AppCompatActivity() {
             startCamera()
         } else {
             ActivityCompat.requestPermissions(
-                this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+                this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
+            )
         }
 
         findViewById<Button>(R.id.image_capture_button).setOnClickListener {
@@ -55,29 +56,32 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+
     private fun takePhoto() {
-        // Get a stable reference of the modifiable image capture use case
+        //获取可修改图像捕获用例的稳定参考
         val imageCapture = imageCapture ?: return
 
-        // Create time stamped name and MediaStore entry.
+        // 创建时间戳名称和 MediaStore 条目。
         val name = SimpleDateFormat(FILENAME_FORMAT, Locale.CHINA)
             .format(System.currentTimeMillis())
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, name)
             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-            if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
                 put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/CameraX-Image")
             }
         }
 
-        // Create output options object which contains file + metadata
+        // 创建包含文件 + 元数据的输出选项对象
         val outputOptions = ImageCapture.OutputFileOptions
-            .Builder(contentResolver,
+            .Builder(
+                contentResolver,
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                contentValues)
+                contentValues
+            )
             .build()
 
-        // Set up image capture listener, which is triggered after photo has
+        //设置抓图监听器，拍照后触发
         // been taken
         imageCapture.takePicture(
             outputOptions,
@@ -88,7 +92,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun
-                        onImageSaved(output: ImageCapture.OutputFileResults){
+                        onImageSaved(output: ImageCapture.OutputFileResults) {
                     val msg = "Photo capture succeeded: ${output.savedUri}"
                     Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                     Log.d("拍照", msg)
@@ -103,41 +107,35 @@ class MainActivity : AppCompatActivity() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         val viewFinder = findViewById<PreviewView>(R.id.viewFinder)
         cameraProviderFuture.addListener({
-            // Used to bind the lifecycle of cameras to the lifecycle owner
+            //用于绑定摄像头的生命周期到生命周期所有者
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
-
-
             // Preview
             val preview = Preview.Builder()
                 .build()
                 .also {
                     it.setSurfaceProvider(viewFinder.surfaceProvider)
                 }
-
             imageCapture = ImageCapture.Builder()
                 .build()
-
-            // Select back camera as a default
+            //默认后置摄像头
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
             try {
-                // Unbind use cases before rebinding
+                // 在重新绑定之前取消所有绑定用例
                 cameraProvider.unbindAll()
-
-                // Bind use cases to camera
+                // 将用例绑定到相机
                 cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview, imageCapture)
-
-            } catch(exc: Exception) {
+                    this, cameraSelector, preview, imageCapture
+                )
+            } catch (exc: Exception) {
                 Log.e("启动相机", "Use case binding failed", exc)
             }
-
         }, ContextCompat.getMainExecutor(this))
     }
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(
-            baseContext, it) == PackageManager.PERMISSION_GRANTED
+            baseContext, it
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     override fun onDestroy() {
@@ -147,28 +145,31 @@ class MainActivity : AppCompatActivity() {
 
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<String>, grantResults:
-        IntArray) {
+        IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (allPermissionsGranted()) {
                 startCamera()
             } else {
-                Toast.makeText(this,
+                Toast.makeText(
+                    this,
                     "无权限.",
-                    Toast.LENGTH_SHORT).show()
+                    Toast.LENGTH_SHORT
+                ).show()
                 finish()
             }
         }
     }
 
 
-    companion object{
+    companion object {
 
         private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
 
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS =
-            mutableListOf (
+            mutableListOf(
                 Manifest.permission.CAMERA,
                 Manifest.permission.RECORD_AUDIO
             ).apply {
